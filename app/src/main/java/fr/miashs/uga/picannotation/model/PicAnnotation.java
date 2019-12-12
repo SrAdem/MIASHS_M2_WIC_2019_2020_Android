@@ -8,7 +8,7 @@ import androidx.room.Relation;
 
 import java.util.List;
 
-public class picAnnotation {
+public class PicAnnotation {
 
     @Embedded
     public EventAnnotation eventAnnot;
