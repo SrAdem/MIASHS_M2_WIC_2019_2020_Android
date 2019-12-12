@@ -3,4 +3,6 @@
     <string name="title_home">Home</string>
     <string name="title_annotation">Annotation</string>
     <string name="title_search">Search</string>
+    <string name="ourImage">FutureImage</string>
+    <string name="addContact">Add Contact</string>
 </resources>

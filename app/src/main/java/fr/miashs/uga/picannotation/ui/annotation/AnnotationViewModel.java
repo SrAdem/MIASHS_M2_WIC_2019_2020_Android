@@ -10,7 +10,7 @@ public class AnnotationViewModel extends ViewModel {
 
     public AnnotationViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is annotation fragment");
+        mText.setValue("This is an ultra BG");
     }
 
     public LiveData<String> getText() {
