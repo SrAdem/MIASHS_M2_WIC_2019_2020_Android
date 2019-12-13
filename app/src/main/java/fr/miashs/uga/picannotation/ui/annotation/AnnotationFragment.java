@@ -2,10 +2,15 @@ package fr.miashs.uga.picannotation.ui.annotation;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +30,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 
 import fr.miashs.uga.picannotation.R;
 
@@ -77,7 +85,12 @@ public class AnnotationFragment extends Fragment {
                 new DividerItemDecoration(view.getContext(),DividerItemDecoration.VERTICAL));
 
         int imageDefault = getResources().getIdentifier("@mipmap/ic_launcher", null, view.getContext().getPackageName());
-        img.setImageResource(imageDefault);
+        //img.setImageResource(imageDefault);
+        Glide.with(this)
+                .load(imageDefault)
+                .apply(new RequestOptions().override(500,500))
+                /*.centerCrop()*/
+                .into(img);
 
         img.setOnClickListener(imgBtnAdd);
         addContactBtn.setOnClickListener(contactAddBtn);
@@ -108,8 +121,32 @@ public class AnnotationFragment extends Fragment {
 
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if(requestCode == PICK_IMG && resultCode == RESULT_OK){
-            //Log.i("DEBUG", "On a choisi notre image");
-            img.setImageURI(data.getData());
+            Uri imageUri = data.getData();
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContext().getContentResolver(), imageUri);
+
+                Display display = this.getActivity().getWindowManager().getDefaultDisplay();
+                Point size = new Point();
+                display.getSize(size);
+                int sw,sh;
+
+                if(bitmap.getHeight() > bitmap.getWidth()) {
+                    sh = size.y / 2;
+                    sw = bitmap.getWidth()*sh/bitmap.getHeight();
+                }
+                else {
+                    sw = size.x;
+                    sh = bitmap.getHeight()*sw/bitmap.getWidth();
+                }
+                Bitmap resized = Bitmap.createScaledBitmap(bitmap, sw, sh, true);
+                Glide.with(this)
+                        .load(resized)
+                        .apply(new RequestOptions().override(sw,sh))
+                        .centerCrop()
+                        .into(img);
+            }
+            catch(Exception e) {
+            }
         }
         if(requestCode == PICK_CONTACT && resultCode == RESULT_OK){
             UriContact = data.getData();
