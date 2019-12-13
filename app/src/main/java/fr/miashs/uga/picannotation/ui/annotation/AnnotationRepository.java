@@ -1,4 +1,4 @@
-package fr.miashs.uga.picannotation;
+package fr.miashs.uga.picannotation.ui.annotation;
 
 import android.app.Application;
 
