@@ -7,4 +7,7 @@
     <string name="addContact">Add Contact</string>
     <string name="textItem">Line X</string>
     <string name="ContentItemImage">Image Delete</string>
+    <string name="eventView">Votre futur Event</string>
+    <string name="btnAddEvent">Add Event</string>
+    <string name="button_save">Save Infos</string>
 </resources>

@@ -62,6 +62,7 @@ public class ContactAnnotAdapter extends RecyclerView.Adapter<ContactViewHolder>
         myContacts.remove(position);
         notifyItemRemoved(position);
         notifyItemRangeChanged(position,myContacts.size());
+        //Log.i("DEBUG","Liste Uri contact length : "+this.getItemCount());
     }
 
     private String retrieveContactName(Uri uriContact){
@@ -73,8 +74,7 @@ public class ContactAnnotAdapter extends RecyclerView.Adapter<ContactViewHolder>
 
         if (cursor.moveToFirst()) {
 
-            // DISPLAY_NAME = The display name for the contact.
-            // HAS_PHONE_NUMBER =   An indicator of whether this contact has at least one phone number.
+            // DISPLAY_NAME = The display name for the contact
 
             contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
         }

@@ -23,13 +23,13 @@
 
     <ImageButton
         android:id="@+id/main_line_delete"
-        android:layout_width="80dp"
-        android:layout_height="45dp"
+        android:layout_width="79dp"
+        android:layout_height="30dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginStart="18dp"
-        android:layout_marginTop="3dp"
-        android:layout_marginEnd="19dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="18dp"
         android:layout_toEndOf="@+id/item_textView"
         android:clickable="true"
         android:contentDescription="@string/ContentItemImage"

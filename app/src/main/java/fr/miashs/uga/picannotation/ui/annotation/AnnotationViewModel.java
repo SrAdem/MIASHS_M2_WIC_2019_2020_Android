@@ -44,6 +44,7 @@ public class AnnotationViewModel extends AndroidViewModel {
             contacts.getValue().add(text);
             contacts.postValue(contacts.getValue());
         }
+        //Log.i("DEBUG","Liste Uri contact length : "+contacts.getValue().size());
     }
 
     public void insertPictureContact(ContactAnnotation contactAnnot){
