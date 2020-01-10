@@ -9,5 +9,13 @@
     <string name="ContentItemImage">Image Delete</string>
     <string name="eventView">Votre futur Event</string>
     <string name="btnAddEvent">Add Event</string>
-    <string name="button_save">Save Infos</string>
+    <string name="button_save">Save Info</string>
+    <string name="test">Test</string>
+    <string name="contentDescBtnTrash">Btn Delete Annot</string>
+    <string name="button_trash">Delete</string>
+    <string name="edit_name">Enter Name(s)</string>
+    <string name="search_button">Search</string>
+    <string name="edit_names_hint">Enter Name(s)</string>
+    <string name="edit_event">Enter Event</string>
+    <string name="edit_eventView">Choisir un Evènement</string>
 </resources>
