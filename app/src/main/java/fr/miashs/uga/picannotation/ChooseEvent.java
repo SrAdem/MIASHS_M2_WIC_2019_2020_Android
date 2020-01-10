@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CalendarContract;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.CalendarView;
 import android.widget.Toast;
@@ -24,8 +23,6 @@ import androidx.recyclerview.selection.StableIdKeyProvider;
 import androidx.recyclerview.selection.StorageStrategy;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import java.util.Calendar;
 
 public class ChooseEvent extends AppCompatActivity implements CalendarView.OnDateChangeListener, OnItemActivatedListener<Long> {
 
@@ -60,8 +57,6 @@ public class ChooseEvent extends AppCompatActivity implements CalendarView.OnDat
     }
 
     public boolean onItemActivated(@NonNull ItemDetailsLookup.ItemDetails<Long> item, @NonNull MotionEvent e){
-        /* Toast.makeText(this, "event id : "+item.getSelectionKey(), Toast.LENGTH_LONG).show(); */
-        Log.v("ITEM SELECTED", "event id : "+item.getSelectionKey());
 
         Uri selectedEvent = Uri.withAppendedPath(CalendarContract.Events.CONTENT_URI, item.getSelectionKey().toString());
 
@@ -70,8 +65,6 @@ public class ChooseEvent extends AppCompatActivity implements CalendarView.OnDat
         this.setResult(Activity.RESULT_OK, res);
         this.finish();
 
-        // Ajouter les bons IntentFilter  de  type ActionPick sur le Calendar
-        Toast.makeText(this, "event uri : "+selectedEvent, Toast.LENGTH_LONG).show();
         return false;
     }
 
@@ -83,7 +76,6 @@ public class ChooseEvent extends AppCompatActivity implements CalendarView.OnDat
         if(readCalendarAuthorize){
             adapter.setDate(year, month, dayOfMonth);
         }
-
     }
 
     public void checkCalendarReadPermission(){
@@ -104,10 +96,6 @@ public class ChooseEvent extends AppCompatActivity implements CalendarView.OnDat
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.READ_CALENDAR},
                         MY_PERMISSIONS_REQUEST_READ_CALENDAR);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
             }
         } else {
             // Permission has already been granted

@@ -15,7 +15,12 @@
         android:id="@+id/navigation_annotation"
         android:name="fr.miashs.uga.picannotation.ui.annotation.AnnotationFragment"
         android:label="@string/title_annotation"
-        tools:layout="@layout/fragment_annotation" />
+        tools:layout="@layout/fragment_annotation" >
+        <action
+            android:id="@+id/action_navigation_annotation_to_navigation_home"
+            app:destination="@id/navigation_home"
+            app:enterAnim="@anim/nav_default_pop_enter_anim" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_search"

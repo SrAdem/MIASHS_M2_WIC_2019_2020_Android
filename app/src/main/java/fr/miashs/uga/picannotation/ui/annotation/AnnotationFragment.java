@@ -17,16 +17,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -36,9 +40,12 @@ import java.util.List;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import fr.miashs.uga.picannotation.R;
 import fr.miashs.uga.picannotation.ChooseEvent;
+import fr.miashs.uga.picannotation.model.PicAnnotation;
+import fr.miashs.uga.picannotation.ui.home.HomeFragment;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -53,6 +60,8 @@ public class AnnotationFragment extends Fragment {
     private ImageView img;
     private Button addContactBtn;
     private Button addEventBtn;
+    private Button btn_save;
+    private Button btn_trash;
     private TextView eventView;
     private Uri UriContact;
 
@@ -71,52 +80,79 @@ public class AnnotationFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_annotation, container, false);
 
-        //Composants Graphique
-        img = (ImageView)view.findViewById(R.id.annotImageView);
-        addContactBtn = (Button)view.findViewById(R.id.buttonContact);
-        addEventBtn = (Button)view.findViewById(R.id.buttonEvent);
-        eventView = (TextView)view.findViewById(R.id.event_View);
-        listContact = (RecyclerView)view.findViewById(R.id.listContacts);
+        //Composants graphiques
+        img = view.findViewById(R.id.annotImageView);
+        addContactBtn = view.findViewById(R.id.buttonContact);
+        addEventBtn = view.findViewById(R.id.buttonEvent);
+        btn_save = view.findViewById(R.id.button_save);
+        btn_trash = view.findViewById(R.id.button_trash);
+        eventView = view.findViewById(R.id.event_View);
+        listContact = view.findViewById(R.id.listContacts);
 
+        //Fixe une taille fixe à la liste de contacts
         listContact.setHasFixedSize(true);
 
         myLayoutManager = new LinearLayoutManager(view.getContext());
         listContact.setLayoutManager(myLayoutManager);
 
-        myAdapter = new ContactAnnotAdapter(view.getContext(),new ArrayList<>(0));
+        myAdapter = new ContactAnnotAdapter(view.getContext());
         listContact.setAdapter(myAdapter);
 
-        annotationViewModel.getAllContact().observe(this, new Observer<List<Uri>>() {
+        myAdapter.getMyContactsLive().observe(this, new Observer<List<Uri>>() {
             @Override
             public void onChanged(@Nullable final List<Uri> contacts) {
-                // Update the cached copy of the words in the adapter.
-                myAdapter.setContact(contacts);
+                // Update la copie des contacts dans l'adapter
+               annotationViewModel.setContacts(contacts);
+            }
+        });
+
+        //Suppression d'un ContactAnnotation à la volée
+        //Observe le contact supprimé dans le RecyclerView et vérifie si un ContactAnnotation existe pour lui sur l'image en cours
+        myAdapter.getMyContactDelete().observe(AnnotationFragment.this, new Observer<Uri>() {
+            @Override
+            public void onChanged(Uri contactUri) {
+                Uri imageUri = annotationViewModel.getPicUri();
+                if(imageUri != null){
+                    annotationViewModel.getCountContactAnnotExist(imageUri,contactUri).observe(AnnotationFragment.this, new Observer<Integer>() {
+                        @Override
+                        public void onChanged(Integer integer) {
+                            if(integer == 1){
+                                Log.i("DEBUG","L'image : "+imageUri+" pour le contact : "+contactUri+" possède une ContactAnnotation dans notre bdd -> Supprimer");
+                                annotationViewModel.deleteContactAnnotation(imageUri, contactUri);
+                            }
+                        }
+                    });
+                }
             }
         });
 
         //Divider entre les items de la liste
-        listContact.addItemDecoration(
-                new DividerItemDecoration(view.getContext(),DividerItemDecoration.VERTICAL));
+        listContact.addItemDecoration(new DividerItemDecoration(view.getContext(),DividerItemDecoration.VERTICAL));
 
-        int imageDefault = getResources().getIdentifier("@mipmap/ic_launcher", null, view.getContext().getPackageName());
-        //img.setImageResource(imageDefault);
+        //Défini l'image par défaut (ici un vector add_a_photo_black)
+        int imageDefault = getResources().getIdentifier("@drawable/ic_add_a_photo_black_24dp", null, view.getContext().getPackageName());
+
         Glide.with(this)
                 .load(imageDefault)
                 .apply(new RequestOptions().override(500,500))
                 /*.centerCrop()*/
                 .into(img);
 
+        //Setter des Listeners
         img.setOnClickListener(imgBtnAdd);
         addContactBtn.setOnClickListener(contactAddBtn);
+        eventView.setOnClickListener(eventAddBtn);
         addEventBtn.setOnClickListener(eventAddBtn);
+        btn_save.setOnClickListener(saveAll);
+        btn_trash.setOnClickListener(deleteBtn);
 
         return view;
     }
 
+    //Action lors du click du bouton add Image
     private View.OnClickListener imgBtnAdd = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            //Log.i(" DEBUG ", "Click sur l'image");
             checkImageReadPermission();
             Intent pickImg = new Intent(Intent.ACTION_PICK);
             pickImg.setType("image/*");
@@ -124,33 +160,90 @@ public class AnnotationFragment extends Fragment {
         }
     };
 
+    //Action lors du click du bouton add Contact
     private View.OnClickListener contactAddBtn = new View.OnClickListener(){
         @Override
         public void onClick(View view) {
-            //Log.i("DEBUG", "Click sur Button Contact");
             checkContactReadPermission();
             Intent pickContact = new Intent(Intent.ACTION_PICK, Uri.parse("content://contacts"));
             pickContact.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
-            //pickContact.setData(ContactsContract.Data.CONTENT_URI);
             startActivityForResult(pickContact, PICK_CONTACT);
         }
     };
 
+    //Action lors du click du bouton add Event
     private View.OnClickListener eventAddBtn = new View.OnClickListener(){
         @Override
         public void onClick(View view) {
-            //Log.i("DEBUG", "Click sur Button Event");
-
             Intent pickEvent = new Intent(view.getContext(), ChooseEvent.class);
-
             startActivityForResult(pickEvent, PICK_EVENT);
+        }
+    };
 
+    //Action lors du click du bouton Save + redirection vers Home
+    private View.OnClickListener saveAll = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            //Test les valeurs demandées présentes
+            //SI présentes -> Faire les insert SINON -> Afficher "Données manquantes, Réessayez"
+            if(annotationViewModel.getPicUri() != null && annotationViewModel.getEventUri().getValue() != null && myAdapter.getItemCount() > 0){
+                annotationViewModel.save();
+                Navigation.findNavController(view).navigate(R.id.action_navigation_annotation_to_navigation_home);
+            }else {
+                Toast.makeText(getContext(),"Données manquantes, Réessayez !",Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
+    //Action lors du click bouton delete
+    private View.OnClickListener deleteBtn = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            //Suppression de l'Annotation de l'image
+            //Test s'il existe une annotation pour cette image
+            annotationViewModel.getCountEventAnnotExist(annotationViewModel.getPicUri()).observe(AnnotationFragment.this, new Observer<Integer>() {
+                @Override
+                public void onChanged(Integer integer) {
+                    if(integer == 1){
+                        annotationViewModel.deletePicEventAnnotation();
+                        annotationViewModel.deletePicContactAnnotation();
+                        Toast.makeText(getContext(),"Annotations de l'image supprimées",Toast.LENGTH_SHORT).show();
+                    }else {
+                        Toast.makeText(getContext(),"Pas d'annotations sauvegardées",Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
         }
     };
 
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        //On a choisi notre image et on va l'ajouter à notre vue
         if(requestCode == PICK_IMG && resultCode == RESULT_OK){
             Uri imageUri = data.getData();
+            annotationViewModel.setPicUri(imageUri);
+
+            //Vérifie s'il existe un PicAnnotation pour cette image
+            annotationViewModel.getPicAnnotation(imageUri).observe(AnnotationFragment.this, new Observer<PicAnnotation>() {
+                @Override
+                public void onChanged(@Nullable PicAnnotation picAnnotation) {
+                    //Si déjà annoté, remplir les champs avec les infos
+                    if(picAnnotation != null){
+                        if(picAnnotation.getEventUri() != null) {
+                            eventView.setText(getEventName(picAnnotation.getEventUri().getLastPathSegment()));
+                            annotationViewModel.setEventUri(picAnnotation.getEventUri());
+                        }
+                        if(picAnnotation.getContactsUris() != null){
+                            for(Uri contact : picAnnotation.getContactsUris()){
+                                annotationViewModel.addContact(contact);
+                            }
+                            myAdapter.setContacts(picAnnotation.contactsUris);
+                        }
+                    }else {
+                        eventView.setText("Votre futur Event");
+                        myAdapter.setContacts(new ArrayList<>());
+                    }
+                }
+            });
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContext().getContentResolver(), imageUri);
 
@@ -177,19 +270,22 @@ public class AnnotationFragment extends Fragment {
             catch(Exception e) {
             }
         }
+        //On a choisi notre contact et on va l'ajouter à notre liste data et UI
         if(requestCode == PICK_CONTACT && resultCode == RESULT_OK){
             UriContact = data.getData();
-            //Log.i("DEBUG", "On a choisi notre contact : "+ UriContact);
-            annotationViewModel.insertContact(UriContact);
+            myAdapter.addContact(UriContact);
+            annotationViewModel.addContact(UriContact);
         }
+        //On a choisi notre event et on va l'ajouter à notre vue
         if(requestCode == PICK_EVENT && resultCode == RESULT_OK){
             Uri EventUri = data.getData();
-            //Log.i("DEBUG", "On a choisi notre Event : "+EventUri);
+            annotationViewModel.setEventUri(EventUri);
 
             eventView.setText(getEventName(EventUri.getLastPathSegment()));
         }
     }
 
+    //Récupère le nom de l'event en fonction de son id
     public String getEventName(String id) {
         Cursor cursor = null;
         String result = "";
@@ -207,6 +303,7 @@ public class AnnotationFragment extends Fragment {
         return result;
     }
 
+    //Check les permissions d'accès aux contacts
     public void checkContactReadPermission(){
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(this.getContext(),
@@ -232,6 +329,7 @@ public class AnnotationFragment extends Fragment {
         }
     }
 
+    //Check les permissions d'accès aux fichiers externes (images)
     public void checkImageReadPermission(){
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(this.getContext(),
@@ -257,6 +355,7 @@ public class AnnotationFragment extends Fragment {
         }
     }
 
+    //Authorise accès si permissions ok
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
