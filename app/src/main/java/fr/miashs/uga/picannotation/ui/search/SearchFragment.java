@@ -28,19 +28,24 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.navigation.Navigation;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipDrawable;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import fr.miashs.uga.picannotation.ChooseEvent;
 import fr.miashs.uga.picannotation.R;
+import fr.miashs.uga.picannotation.model.PicAnnotation;
 import fr.miashs.uga.picannotation.ui.annotation.AnnotationFragment;
 
 import static android.app.Activity.RESULT_OK;
@@ -60,6 +65,9 @@ public class SearchFragment extends Fragment {
     private Button eventBtn;
     private TextView eventView;
     private ChipGroup myChipGroup;
+    private Bundle bundle = new Bundle();
+
+    private ArrayList<Uri> listResult = new ArrayList<>();
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         searchViewModel = ViewModelProviders.of(this).get(SearchViewModel.class);
@@ -87,8 +95,49 @@ public class SearchFragment extends Fragment {
         @Override
         public void onClick(View view) {
             Log.i("DEBUG","On lance la recherche");
-            searchViewModel.search();
-            Toast.makeText(getContext(),"Recherche en cours.. ",Toast.LENGTH_SHORT).show();
+            listResult.clear();
+            searchViewModel.search().observe(SearchFragment.this, new Observer<List<PicAnnotation>>() {
+                @Override
+                public void onChanged(List<PicAnnotation> picAnnotations) {
+                    //Recherche faite juste avec une liste de contact
+                    if(searchViewModel.getContacts().size() > 0 && searchViewModel.getEventUri().getValue() == null){
+                        Log.i("DEBUG","Resultat Recherche par contacts seulement");
+                        Toast.makeText(getContext(),"Recherche par contacts seulement",Toast.LENGTH_SHORT).show();
+                        if(searchViewModel.getContacts().size()== 1){
+                            Log.i("DEBUG","Resultat Recherche pour 1 contact seulement");
+                            for(PicAnnotation pic : picAnnotations){
+                                listResult.add(pic.getPicUri());
+                            }
+                        }else {
+                            Log.i("DEBUG","Resultat Recherche pour plusieurs contacts seulement");
+                            for(PicAnnotation pic : picAnnotations){
+                                if(pic.getContactsUris().size() == searchViewModel.getContacts().size()){
+                                    //Log.i("DEBUG","Cette image : "+pic.getPicUri()+" contient nos "+searchViewModel.getContacts().size()+" contacts : "+pic.getContactsUris());
+                                    listResult.add(pic.getPicUri());
+                                }
+                            }
+                        }
+                    }else if(searchViewModel.getContacts().size() == 0 && searchViewModel.getEventUri().getValue() != null){
+                        Log.i("DEBUG","Resultat Recherche par event seulement");
+                        Toast.makeText(getContext(),"Recherche par event seulement",Toast.LENGTH_SHORT).show();
+                        for(PicAnnotation pic : picAnnotations){
+                            listResult.add(pic.getPicUri());
+                        }
+                    } else {
+                        Log.i("DEBUG","Resultat Recherche par event et contact");
+                        Toast.makeText(getContext(),"Recherche par event et contact",Toast.LENGTH_SHORT).show();
+                        for(PicAnnotation pic : picAnnotations){
+                            if(pic.getContactsUris().size() == searchViewModel.getContacts().size()){
+                                Log.i("DEBUG","RES : "+pic.toString());
+                                listResult.add(pic.getPicUri());
+                            }
+                        }
+                    }
+                    Log.i("DEBUG","Resultat final de la recherche : "+listResult.size());
+                    bundle.putParcelableArrayList("Result",listResult);
+                    Navigation.findNavController(view).navigate(R.id.action_navigation_search_to_navigation_searchresult,bundle);
+                }
+            });
         }
     };
 
