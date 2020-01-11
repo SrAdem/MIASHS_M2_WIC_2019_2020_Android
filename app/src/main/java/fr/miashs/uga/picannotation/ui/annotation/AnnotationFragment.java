@@ -154,8 +154,10 @@ public class AnnotationFragment extends Fragment {
         @Override
         public void onClick(View view) {
             checkImageReadPermission();
-            Intent pickImg = new Intent(Intent.ACTION_PICK);
+            Intent pickImg = new Intent(Intent.ACTION_OPEN_DOCUMENT);
             pickImg.setType("image/*");
+            pickImg.addFlags((Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION));
             startActivityForResult(pickImg,PICK_IMG);
         }
     };
@@ -220,6 +222,14 @@ public class AnnotationFragment extends Fragment {
         //On a choisi notre image et on va l'ajouter à notre vue
         if(requestCode == PICK_IMG && resultCode == RESULT_OK){
             Uri imageUri = data.getData();
+
+            final int takeFlags = data.getFlags()
+                    & (Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+            // Check for the freshest data.
+            this.getContext().getContentResolver().takePersistableUriPermission(imageUri,takeFlags);
+
             annotationViewModel.setPicUri(imageUri);
 
             //Vérifie s'il existe un PicAnnotation pour cette image
