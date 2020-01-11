@@ -18,4 +18,6 @@
     <string name="edit_names_hint">Enter Name(s)</string>
     <string name="edit_event">Enter Event</string>
     <string name="edit_eventView">Choisir un Evènement</string>
+    <string name="result">Résultats :</string>
+    <string name="searchResults">Search Results</string>
 </resources>

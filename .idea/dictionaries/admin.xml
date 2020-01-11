@@ -10,6 +10,7 @@
       <w>annot</w>
       <w>annoté</w>
       <w>annotée</w>
+      <w>appel</w>
       <w>appeler</w>
       <w>attendre</w>
       <w>avec</w>
@@ -23,7 +24,9 @@
       <w>choisie</w>
       <w>composants</w>
       <w>compte</w>
+      <w>compteur</w>
       <w>conflit</w>
+      <w>contient</w>
       <w>copie</w>
       <w>correspondant</w>
       <w>cours</w>
@@ -36,8 +39,10 @@
       <w>défini</w>
       <w>déjà</w>
       <w>enlever</w>
+      <w>ensuite</w>
       <w>entre</w>
       <w>entrée</w>
+      <w>envoyer</w>
       <w>envoyées</w>
       <w>existe</w>
       <w>externes</w>
@@ -69,6 +74,7 @@
       <w>nouveaux</w>
       <w>nouvelle</w>
       <w>picannotation</w>
+      <w>plusieurs</w>
       <w>possède</w>
       <w>présent</w>
       <w>présente</w>
@@ -77,15 +83,21 @@
       <w>remplir</w>
       <w>renvoie</w>
       <w>requête</w>
+      <w>requêtes</w>
+      <w>resultat</w>
+      <w>resultats</w>
       <w>retourne</w>
       <w>retravailler</w>
       <w>rien</w>
       <w>récupère</w>
       <w>réessayez</w>
+      <w>répondant</w>
+      <w>résultats</w>
       <w>réussie</w>
       <w>sauvegarde</w>
       <w>sauvegardée</w>
       <w>sauvegardées</w>
+      <w>searchresult</w>
       <w>seulement</w>
       <w>sinon</w>
       <w>soient</w>
