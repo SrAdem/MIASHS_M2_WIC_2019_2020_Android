@@ -132,6 +132,63 @@ public class AnnotationFragment extends Fragment {
         //Défini l'image par défaut (ici un vector add_a_photo_black)
         int imageDefault = getResources().getIdentifier("@drawable/ic_add_a_photo_black_24dp", null, view.getContext().getPackageName());
 
+        //Si Récupération d'image par Action Send
+        //TODO : Display la photo envoyée
+        if(getArguments() != null && getArguments().getString("IMGURI") != null){
+            Uri sendImgUri = Uri.parse(getArguments().getString("IMGURI"));
+
+            annotationViewModel.setPicUri(sendImgUri);
+
+            annotationViewModel.getPicAnnotation(sendImgUri).observe(AnnotationFragment.this, new Observer<PicAnnotation>() {
+                @Override
+                public void onChanged(PicAnnotation picAnnotation) {
+                    //Si déjà annoté, remplir les champs avec les infos
+                    if(picAnnotation != null){
+
+                        if(picAnnotation.getEventUri() != null) {
+                            eventView.setText(getEventName(picAnnotation.getEventUri().getLastPathSegment()));
+                            annotationViewModel.setEventUri(picAnnotation.getEventUri());
+                        }
+                        if(picAnnotation.getContactsUris() != null){
+                            for(Uri contact : picAnnotation.getContactsUris()){
+                                annotationViewModel.addContact(contact);
+                            }
+                            myAdapter.setContacts(picAnnotation.contactsUris);
+                        }
+                    }else {
+                        eventView.setText("Votre futur Event");
+                        myAdapter.setContacts(new ArrayList<>());
+                    }
+                }
+            });
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContext().getContentResolver(), sendImgUri);
+
+                Display display = this.getActivity().getWindowManager().getDefaultDisplay();
+                Point size = new Point();
+                display.getSize(size);
+                int sw,sh;
+
+                if(bitmap.getHeight() > bitmap.getWidth()) {
+                    sh = size.y / 2;
+                    sw = bitmap.getWidth()*sh/bitmap.getHeight();
+                }
+                else {
+                    sw = size.x;
+                    sh = bitmap.getHeight()*sw/bitmap.getWidth();
+                }
+                Bitmap resized = Bitmap.createScaledBitmap(bitmap, sw, sh, true);
+                Glide.with(this)
+                        .load(resized)
+                        .apply(new RequestOptions().override(sw,sh))
+                        .centerCrop()
+                        .into(img);
+            }
+            catch(Exception e) {
+            }
+        }
+
+
         Glide.with(this)
                 .load(imageDefault)
                 .apply(new RequestOptions().override(500,500))

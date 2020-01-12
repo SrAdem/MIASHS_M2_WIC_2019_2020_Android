@@ -31,6 +31,14 @@ public class MainActivity extends AppCompatActivity {
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
+
+        if(Intent.ACTION_SEND.equals(getIntent().getAction()) && getIntent().getType() != null){
+            if(getIntent().getType().startsWith("image/")){
+                Bundle bundle = new Bundle();
+                bundle.putString("IMGURI",getIntent().getParcelableExtra(Intent.EXTRA_STREAM).toString());
+                navController.navigate(R.id.navigation_annotation, bundle);
+            }
+        }
     }
 
     @Override
