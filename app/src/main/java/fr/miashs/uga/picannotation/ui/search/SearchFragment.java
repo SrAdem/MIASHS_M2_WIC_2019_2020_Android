@@ -67,7 +67,7 @@ public class SearchFragment extends Fragment {
     private ChipGroup myChipGroup;
     private Bundle bundle = new Bundle();
 
-    private ArrayList<Uri> listResult = new ArrayList<>();
+    private List<Uri> listResult = new ArrayList<>();
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         searchViewModel = ViewModelProviders.of(this).get(SearchViewModel.class);
@@ -134,7 +134,7 @@ public class SearchFragment extends Fragment {
                         }
                     }
                     Log.i("DEBUG","Resultat final de la recherche : "+listResult.size());
-                    bundle.putParcelableArrayList("Result",listResult);
+                    bundle.putString("Result",listResult.toString());
                     Navigation.findNavController(view).navigate(R.id.action_navigation_search_to_navigation_searchresult,bundle);
                 }
             });

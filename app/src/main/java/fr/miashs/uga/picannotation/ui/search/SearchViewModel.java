@@ -21,10 +21,6 @@ public class SearchViewModel extends AndroidViewModel {
     private SearchRepository searchRepository;
     private List<Uri> contacts = new ArrayList<>();
     private MutableLiveData<Uri> myEventUri = new MutableLiveData<>();
-    private MediatorLiveData liveDataMerger = new MediatorLiveData();
-
-    private LiveData<List<PicAnnotation>> resultEvent;
-    private LiveData<List<PicAnnotation>> resultContact;
 
     public SearchViewModel(Application app) {
         super(app);
