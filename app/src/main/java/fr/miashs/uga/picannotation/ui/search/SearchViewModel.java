@@ -3,6 +3,7 @@ package fr.miashs.uga.picannotation.ui.search;
 import android.app.Application;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -28,43 +29,36 @@ public class SearchViewModel extends AndroidViewModel {
     }
 
     //Lance la recherche
-    public LiveData<List<PicAnnotation>> search(){
-
+    public LiveData<List<Uri>> search(){
         //Tests pour appeler la bonne fonction de requête
         if(getContacts().size() == 0 && getEventUri().getValue() != null){
             //Appel fonction de recherche par Event seulement
+            Toast.makeText(getApplication().getApplicationContext(),"Recherche par event seulement",Toast.LENGTH_SHORT).show();
             return getResultSearchByGivenEvent(getEventUri().getValue());
         }else if(getContacts().size() != 0 && getEventUri().getValue() == null){
             //Appel fonction de recherche par Contact seulement
+            Toast.makeText(getApplication().getApplicationContext(),"Recherche par contacts seulement",Toast.LENGTH_SHORT).show();
             return getResultSearchByGivenContacts(getContacts());
         }else {
             //Appel fonction de recherche par Event et Contact
+            Toast.makeText(getApplication().getApplicationContext(),"Recherche par event et contact",Toast.LENGTH_SHORT).show();
             return getResultSearchByEventAndContact(getEventUri().getValue(),getContacts());
         }
     }
 
     //Fonction de recherche par Event
-    public LiveData<List<PicAnnotation>> getResultSearchByGivenEvent(Uri eventUri){
-        return searchRepository.getResultSearchByGivenEvent(getEventUri().getValue());
-        //return searchRepository.getCountResultSearchGivenEvent(eventUri);
+    public LiveData<List<Uri>> getResultSearchByGivenEvent(Uri eventUri){
+        return searchRepository.getResultSearchByGivenEvent(eventUri);
     }
 
     //Fonction de recherche par Contact
-    public LiveData<List<PicAnnotation>> getResultSearchByGivenContacts(List<Uri> contacts){
-        if(contacts.size() == 1){
-            return searchRepository.getResultSearchByGivenOneContact(contacts.get(0));
-        }else {
-            return searchRepository.getResultSearchByGivenContacts(contacts);
-        }
-        //return searchRepository.getCountResultSearchGivenContacts(contacts);
+    public LiveData<List<Uri>> getResultSearchByGivenContacts(List<Uri> contacts){
+        return searchRepository.getResultSearchByGivenContacts(contacts);
     }
 
     //Fonction de recherche par Event et Contact
-    public LiveData<List<PicAnnotation>> getResultSearchByEventAndContact(Uri eventUri, List<Uri> contacts){
-
+    public LiveData<List<Uri>> getResultSearchByEventAndContact(Uri eventUri, List<Uri> contacts){
         return searchRepository.getResultSearchByEventAndContacts(eventUri,contacts);
-        //return searchRepository.getCountResultSearchEventAndContacts(eventUri, contacts);
-
     }
 
     //Ajoute un contact dans contacts

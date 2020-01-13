@@ -11,21 +11,21 @@ import java.util.List;
 
 public class SearchResultViewModel extends AndroidViewModel {
 
-    private List<Uri> picsUri;
+    private List<Uri> mpicsUri;
 
     public SearchResultViewModel(Application application){
         super(application);
-        picsUri = new ArrayList<>();
+        mpicsUri = new ArrayList<>();
     }
 
     public void setPicsUri(List<Uri> picsUri) {
-        if(picsUri.size() != 0){
-            picsUri.clear();
+        if(mpicsUri.size() != 0){
+            mpicsUri.clear();
         }
-        picsUri.addAll(picsUri);
+        mpicsUri.addAll(picsUri);
     }
 
     public List<Uri> getPicsUri() {
-        return picsUri;
+        return mpicsUri;
     }
 }

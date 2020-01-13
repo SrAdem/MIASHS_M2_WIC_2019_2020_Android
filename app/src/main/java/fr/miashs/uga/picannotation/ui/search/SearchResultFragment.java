@@ -5,11 +5,11 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -39,13 +39,14 @@ public class SearchResultFragment extends Fragment {
     private GridView gridResult;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
         searchResultViewModel = ViewModelProviders.of(this).get(SearchResultViewModel.class);
+
         View view = inflater.inflate(R.layout.fragment_resultsearch, container, false);
 
-        //Futur composants graphiques
+        //Composants graphiques
         counterResult = view.findViewById(R.id.counter_results);
         gridResult = view.findViewById(R.id.grid_result);
+
         final MutableLiveData<List<Uri>> listAnnot = new MutableLiveData<>();
         checkReadGalleryPermission();
 
@@ -59,9 +60,10 @@ public class SearchResultFragment extends Fragment {
         }else {
             if(getArguments().getString("Result") != null){
 
+                //Récupère le String envoyé avec la key "Result" contenant la liste des Uris recherchées
                 String resultsParse = getArguments().getString("Result");
                 List<String> listStringResult = Arrays.asList(resultsParse.substring(1,resultsParse.length()-1).split("\\s*(,\\s*)+"));
-                Log.i("DEBUG","listStringResult : "+listStringResult);
+
                 List<Uri> finalResults = new ArrayList<>();
 
                 if(listStringResult.size() != 0 && !listStringResult.toString().equals("[]")){
@@ -70,10 +72,10 @@ public class SearchResultFragment extends Fragment {
                     }
                 }
 
-                Log.i("DEBUG","listUriFinal : "+finalResults);
                 //Affiche le nombre de  résultats
                 counterResult.setText("Resultats obtenus : "+finalResults.size());
 
+                //Vérification des droits avant d'afficher les images
                 if(readGalleryAuthorized){
                     gridResult.setAdapter(mySearchResultAdapter);
                     searchResultViewModel.setPicsUri(finalResults);
@@ -82,17 +84,19 @@ public class SearchResultFragment extends Fragment {
             }
         }
 
-        //Futur Setter
-        counterResult.setOnClickListener(redirection);
-
+        //Setter des composants
+        gridResult.setOnItemClickListener(img_redirection);
         return view;
     }
 
-    //TODO : Retravailler la redirection vers annotate + tard
-    private View.OnClickListener redirection = new View.OnClickListener() {
+    //Redirection vers Annotate pour l'image choisie
+    private AdapterView.OnItemClickListener img_redirection = new AdapterView.OnItemClickListener() {
         @Override
-        public void onClick(View view) {
-            Navigation.findNavController(view).navigate(R.id.action_navigation_searchresult_to_navigation_annotation);
+        public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+            Object myObj = gridResult.getItemAtPosition(position);
+            Bundle bundle = new Bundle();
+            bundle.putString("IMGURI",myObj.toString());
+            Navigation.findNavController(view).navigate(R.id.navigation_annotation, bundle);
         }
     };
 
@@ -108,17 +112,14 @@ public class SearchResultFragment extends Fragment {
             }else {
                 this.myData = listData;
             }
-            Log.i("DEBUG","My data constructor : "+myData);
             myInflater = LayoutInflater.from(context);
         }
 
         void setData(List<Uri> data){
-            Log.i("DEBUG","data : "+data);
             if(this.myData.size() > 0){
                 this.myData.clear();
             }
             this.myData.addAll(data);
-            Log.i("DEBUG","My data : "+myData);
             this.notifyDataSetChanged();
         }
 

@@ -65,9 +65,6 @@ public class SearchFragment extends Fragment {
     private Button eventBtn;
     private TextView eventView;
     private ChipGroup myChipGroup;
-    private Bundle bundle = new Bundle();
-
-    private List<Uri> listResult = new ArrayList<>();
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         searchViewModel = ViewModelProviders.of(this).get(SearchViewModel.class);
@@ -95,49 +92,23 @@ public class SearchFragment extends Fragment {
         @Override
         public void onClick(View view) {
             Log.i("DEBUG","On lance la recherche");
-            listResult.clear();
-            searchViewModel.search().observe(SearchFragment.this, new Observer<List<PicAnnotation>>() {
-                @Override
-                public void onChanged(List<PicAnnotation> picAnnotations) {
-                    //Recherche faite juste avec une liste de contact
-                    if(searchViewModel.getContacts().size() > 0 && searchViewModel.getEventUri().getValue() == null){
-                        Log.i("DEBUG","Resultat Recherche par contacts seulement");
-                        Toast.makeText(getContext(),"Recherche par contacts seulement",Toast.LENGTH_SHORT).show();
-                        if(searchViewModel.getContacts().size()== 1){
-                            Log.i("DEBUG","Resultat Recherche pour 1 contact seulement");
-                            for(PicAnnotation pic : picAnnotations){
-                                listResult.add(pic.getPicUri());
-                            }
-                        }else {
-                            Log.i("DEBUG","Resultat Recherche pour plusieurs contacts seulement");
-                            for(PicAnnotation pic : picAnnotations){
-                                if(pic.getContactsUris().size() == searchViewModel.getContacts().size()){
-                                    //Log.i("DEBUG","Cette image : "+pic.getPicUri()+" contient nos "+searchViewModel.getContacts().size()+" contacts : "+pic.getContactsUris());
-                                    listResult.add(pic.getPicUri());
-                                }
-                            }
-                        }
-                    }else if(searchViewModel.getContacts().size() == 0 && searchViewModel.getEventUri().getValue() != null){
-                        Log.i("DEBUG","Resultat Recherche par event seulement");
-                        Toast.makeText(getContext(),"Recherche par event seulement",Toast.LENGTH_SHORT).show();
-                        for(PicAnnotation pic : picAnnotations){
-                            listResult.add(pic.getPicUri());
-                        }
-                    } else {
-                        Log.i("DEBUG","Resultat Recherche par event et contact");
-                        Toast.makeText(getContext(),"Recherche par event et contact",Toast.LENGTH_SHORT).show();
-                        for(PicAnnotation pic : picAnnotations){
-                            if(pic.getContactsUris().size() == searchViewModel.getContacts().size()){
-                                Log.i("DEBUG","RES : "+pic.toString());
-                                listResult.add(pic.getPicUri());
-                            }
-                        }
+
+            //Vérification d'une recherche vide + affichage message en cas
+            if((searchViewModel.getContacts().size() == 0 && searchViewModel.getEventUri().getValue() != null)
+            || (searchViewModel.getContacts().size() != 0 && searchViewModel.getEventUri().getValue() == null)
+            || (searchViewModel.getContacts().size() != 0 && searchViewModel.getEventUri().getValue() != null)){
+                searchViewModel.search().observe(SearchFragment.this, new Observer<List<Uri>>() {
+                    @Override
+                    public void onChanged(List<Uri> picUris) {
+                        //Création d'un bundle pour envoyer au fragment search_result
+                        Bundle bundle = new Bundle();
+                        bundle.putString("Result",picUris.toString());
+                        Navigation.findNavController(view).navigate(R.id.action_navigation_search_to_navigation_searchresult,bundle);
                     }
-                    Log.i("DEBUG","Resultat final de la recherche : "+listResult.size());
-                    bundle.putString("Result",listResult.toString());
-                    Navigation.findNavController(view).navigate(R.id.action_navigation_search_to_navigation_searchresult,bundle);
-                }
-            });
+                });
+            }else {
+                Toast.makeText(getContext(),"Veuillez renseigner un paramètre",Toast.LENGTH_SHORT).show();
+            }
         }
     };
 

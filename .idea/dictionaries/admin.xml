@@ -27,6 +27,7 @@
       <w>compte</w>
       <w>compteur</w>
       <w>conflit</w>
+      <w>contenant</w>
       <w>contient</w>
       <w>copie</w>
       <w>correspondant</w>
@@ -75,14 +76,17 @@
       <w>notre</w>
       <w>nouveaux</w>
       <w>nouvelle</w>
+      <w>paramètre</w>
       <w>picannotation</w>
       <w>plusieurs</w>
       <w>possède</w>
       <w>présent</w>
       <w>présente</w>
       <w>présentes</w>
+      <w>recherchées</w>
       <w>remplace</w>
       <w>remplir</w>
+      <w>renseigner</w>
       <w>renvoie</w>
       <w>requête</w>
       <w>requêtes</w>
@@ -117,10 +121,12 @@
       <w>valeur</w>
       <w>valeurs</w>
       <w>vers</w>
+      <w>veuillez</w>
       <w>vide</w>
       <w>volée</w>
       <w>votre</w>
       <w>vraiment</w>
+      <w>vérification</w>
       <w>vérifie</w>
     </words>
   </dictionary>

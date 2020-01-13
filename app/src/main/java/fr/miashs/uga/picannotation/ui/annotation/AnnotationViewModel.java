@@ -22,10 +22,6 @@ public class AnnotationViewModel extends AndroidViewModel {
 
     private AnnotationRepository myRepository;
 
-    private LiveData<List<EventAnnotation>> myAllEventAnnotations;
-    private LiveData<List<ContactAnnotation>> myAllContactAnnotations;
-    private LiveData<Integer> countEventAnnotation;
-
     private List<Uri> myContact = new ArrayList<>();
     private MutableLiveData<Uri> myPicUri = new MutableLiveData<>();
     private MutableLiveData<Uri> myEventUri = new MutableLiveData<>();
@@ -33,10 +29,6 @@ public class AnnotationViewModel extends AndroidViewModel {
     public AnnotationViewModel(Application app) {
         super(app);
         myRepository = new AnnotationRepository(app);
-
-        myAllEventAnnotations = myRepository.getAllEventAnnotations();
-        myAllContactAnnotations = myRepository.getAllContactAnnotations();
-        countEventAnnotation = myRepository.getCountEventAnnotation();
     }
 
     //<------------ DELETE ------------>
@@ -95,18 +87,6 @@ public class AnnotationViewModel extends AndroidViewModel {
     //Récupère l'URI de l'event
     public MutableLiveData<Uri> getEventUri(){return myEventUri;}
 
-    //Récupère la liste de tous les EventAnnotation de la bdd
-    //TODO : Utiliser dans HomeFragment
-    public LiveData<List<EventAnnotation>> getAllEventAnnotations() {return myAllEventAnnotations;}
-
-    //Récupère la liste de tous les ContactAnnotation de la bdd
-    //TODO : Utiliser dans SearchFragment | Useless
-    public LiveData<List<ContactAnnotation>> getAllContactAnnotations() {return myAllContactAnnotations;}
-
-    //Compte le nombre d'entrées dans EventAnnotation
-    //TODO : Utiliser dans HomeFragment
-    public LiveData<Integer> getCountEventAnnotation() {return countEventAnnotation;}
-
     //<------------ INSERT/UPDATE ------------>
 
     //Insère un contact dans notre liste Data
@@ -132,12 +112,22 @@ public class AnnotationViewModel extends AndroidViewModel {
 
         //Ajoute un EventAnnotation dans notre bdd
         //Si conflit on remplace avec la nouvelle valeur
-        insertPictureEvent(new EventAnnotation(getPicUri(),getEventUri().getValue()));
+        if(getPicUri() != null && getEventUri().getValue() == null && myContact.size() != 0){
+            for(Uri contact : myContact){
+                insertPictureContact(new ContactAnnotation(getPicUri(),contact));
+            }
+            Toast.makeText(getApplication().getApplicationContext(),"Annotation sauvegardée !",Toast.LENGTH_SHORT).show();
+        }else if(getPicUri() != null && getEventUri().getValue() != null && myContact.size() == 0){
+            insertPictureEvent(new EventAnnotation(getPicUri(),getEventUri().getValue()));
+            Toast.makeText(getApplication().getApplicationContext(),"Annotation sauvegardée !",Toast.LENGTH_SHORT).show();
+        }else if(getPicUri() != null && getEventUri().getValue() != null && myContact.size() != 0){
+            insertPictureEvent(new EventAnnotation(getPicUri(),getEventUri().getValue()));
 
-        //Pour chaque contact dans notre MutableLiveData<List> contacts, ajoute un ContactAnnotation dans notre bdd
-        for(Uri contact : myContact){
-            insertPictureContact(new ContactAnnotation(getPicUri(),contact));
+            //Pour chaque contact dans notre MutableLiveData<List> contacts, ajoute un ContactAnnotation dans notre bdd
+            for(Uri contact : myContact){
+                insertPictureContact(new ContactAnnotation(getPicUri(),contact));
+            }
+            Toast.makeText(getApplication().getApplicationContext(),"Annotation sauvegardée !",Toast.LENGTH_SHORT).show();
         }
-        Toast.makeText(getApplication().getApplicationContext(),"Annotation sauvegardée !",Toast.LENGTH_SHORT).show();
     }
 }

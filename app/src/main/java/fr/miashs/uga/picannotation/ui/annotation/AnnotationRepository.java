@@ -2,7 +2,6 @@ package fr.miashs.uga.picannotation.ui.annotation;
 
 import android.app.Application;
 import android.net.Uri;
-import android.os.AsyncTask;
 
 import androidx.lifecycle.LiveData;
 
@@ -14,25 +13,12 @@ import fr.miashs.uga.picannotation.model.*;
 public class AnnotationRepository {
 
     private PicAnnotationsDao myPicAnnotationsDao;
-    private LiveData<List<EventAnnotation>> myAllEventAnnotations;
-    private LiveData<List<ContactAnnotation>> myAllContactAnnotations;
-    private LiveData<Integer> countEventAnnotation;
 
     public AnnotationRepository(Application application){
         AnnotationDatabase db = AnnotationDatabase.getDatabase(application);
         myPicAnnotationsDao = db.getPicAnnotationDao();
-
-        myAllEventAnnotations = myPicAnnotationsDao.loadEventAnnotations();
-        myAllContactAnnotations = myPicAnnotationsDao.loadContactAnnotations();
-        countEventAnnotation = myPicAnnotationsDao.countEventAnnotation();
     }
     //<------------ READ ------------>
-
-    //TODO : Utiliser dans HomeFragment
-    public LiveData<List<EventAnnotation>> getAllEventAnnotations() {return myAllEventAnnotations;}
-
-    //TODO : Utiliser dans HomeFragment
-    public LiveData<Integer> getCountEventAnnotation() {return countEventAnnotation;}
 
     public LiveData<Integer> getCountContactAnnotExist(ContactAnnotation contactAnnot){
         return myPicAnnotationsDao.countContactAnnotationExist(contactAnnot.getPicUri(),contactAnnot.getContactUri());
@@ -42,7 +28,6 @@ public class AnnotationRepository {
         return myPicAnnotationsDao.countEventAnnotationExist(picUri);
     }
 
-    public LiveData<List<ContactAnnotation>> getAllContactAnnotations() {return myAllContactAnnotations;}
 
     public LiveData<PicAnnotation> getPicAnnotation(Uri picUri){return myPicAnnotationsDao.getPicAnnotation(picUri);}
 

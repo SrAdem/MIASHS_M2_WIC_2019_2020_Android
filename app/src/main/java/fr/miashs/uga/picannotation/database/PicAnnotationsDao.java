@@ -49,12 +49,8 @@ public interface PicAnnotationsDao {
 
     //<-------- GET ALL -------->
     @Transaction
-    @Query("SELECT * FROM event_annotation")
-    LiveData<List<EventAnnotation>> loadEventAnnotations();
-
-    @Transaction
-    @Query("SELECT * FROM contact_annotation")
-    LiveData<List<ContactAnnotation>> loadContactAnnotations();
+    @Query("SELECT picUri FROM event_annotation UNION SELECT picUri FROM contact_annotation")
+    LiveData<List<Uri>> loadAllAnnotations();
 
     //<-------- SEARCH -------->
 
@@ -64,21 +60,17 @@ public interface PicAnnotationsDao {
 
     @Transaction
     @Query("SELECT picUri FROM event_annotation WHERE eventUri=:eventUri")
-    LiveData<List<PicAnnotation>> searchByGivenEvent(Uri eventUri);
+    LiveData<List<Uri>> searchByGivenEvent(Uri eventUri);
 
     @Transaction
-    @Query("SELECt picUri FROM contact_annotation WHERE contactUri=:contact")
-    LiveData<List<PicAnnotation>> searchByOneContact(Uri contact);
-
-    @Transaction
-    @Query("SELECT DISTINCT picUri FROM contact_annotation WHERE contactUri IN(:contacts)")
-    LiveData<List<PicAnnotation>> searchByListContact(List<Uri> contacts);
+    @Query("SELECT DISTINCT picUri FROM contact_annotation WHERE contactUri IN(:contacts) GROUP By picUri HAVING COUNT(picUri) == :sizeList")
+    LiveData<List<Uri>> searchByListContact(List<Uri> contacts, Integer sizeList);
 
     @Transaction
     @Query("SELECT picUri FROM event_annotation WHERE eventUri=:eventUri " +
             "INTERSECT " +
-            "SELECT DISTINCT picUri FROM contact_annotation WHERE contactUri IN(:contacts)")
-    LiveData<List<PicAnnotation>> searchByEventAndContacts(Uri eventUri, List<Uri> contacts);
+            "SELECT DISTINCT picUri FROM contact_annotation WHERE contactUri IN(:contacts) GROUP By picUri HAVING COUNT(picUri) == :sizeList")
+    LiveData<List<Uri>> searchByEventAndContacts(Uri eventUri, List<Uri> contacts, Integer sizeList);
 
     //<-------- COUNTER -------->
 
@@ -89,20 +81,4 @@ public interface PicAnnotationsDao {
     @Transaction
     @Query("SELECT COUNT(*) FROM event_annotation WHERE picUri=:picUri")
     LiveData<Integer> countEventAnnotationExist(Uri picUri);
-
-    @Transaction
-    @Query("SELECT COUNT(*) FROM event_annotation")
-    LiveData<Integer> countEventAnnotation();
-
-    @Transaction
-    @Query("SELECT COUNT(*) FROM event_annotation WHERE eventUri=:eventUri")
-    LiveData<Integer> countResultSearchByGivenEvent(Uri eventUri);
-
-    @Transaction
-    @Query("SELECT COUNT(*) FROM contact_annotation WHERE contactUri IN(:contacts)")
-    LiveData<Integer> countResultSearchByListContact(List<Uri> contacts);
-
-    @Transaction
-    @Query("SELECT COUNT(picUri) FROM event_annotation WHERE eventUri=:eventUri INTERSECT SELECT DISTINCT picUri FROM contact_annotation WHERE contactUri IN(:contacts)")
-    LiveData<Integer> countResultSearchByEventAndContacts(Uri eventUri, List<Uri> contacts);
 }

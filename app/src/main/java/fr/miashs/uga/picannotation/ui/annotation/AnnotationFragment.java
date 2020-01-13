@@ -132,8 +132,7 @@ public class AnnotationFragment extends Fragment {
         //Défini l'image par défaut (ici un vector add_a_photo_black)
         int imageDefault = getResources().getIdentifier("@drawable/ic_add_a_photo_black_24dp", null, view.getContext().getPackageName());
 
-        //Si Récupération d'image par Action Send
-        //TODO : Display la photo envoyée
+        //Si arguments envoyés pour une image par Action_Send
         if(getArguments() != null && getArguments().getString("IMGURI") != null){
             Uri sendImgUri = Uri.parse(getArguments().getString("IMGURI"));
 
@@ -188,12 +187,14 @@ public class AnnotationFragment extends Fragment {
             }
         }
 
-
-        Glide.with(this)
-                .load(imageDefault)
-                .apply(new RequestOptions().override(500,500))
-                /*.centerCrop()*/
-                .into(img);
+        //Si pas d'arguments envoyés on affiche une image par défaut
+        if(getArguments() == null){
+            Glide.with(this)
+                    .load(imageDefault)
+                    .apply(new RequestOptions().override(500,500))
+                    /*.centerCrop()*/
+                    .into(img);
+        }
 
         //Setter des Listeners
         img.setOnClickListener(imgBtnAdd);
@@ -245,7 +246,9 @@ public class AnnotationFragment extends Fragment {
         public void onClick(View view) {
             //Test les valeurs demandées présentes
             //SI présentes -> Faire les insert SINON -> Afficher "Données manquantes, Réessayez"
-            if(annotationViewModel.getPicUri() != null && annotationViewModel.getEventUri().getValue() != null && myAdapter.getItemCount() > 0){
+            if((annotationViewModel.getPicUri() != null && annotationViewModel.getEventUri().getValue() != null && myAdapter.getItemCount() > 0)
+            || (annotationViewModel.getPicUri() != null && annotationViewModel.getEventUri().getValue() == null && myAdapter.getItemCount() > 0)
+            || (annotationViewModel.getPicUri() != null && annotationViewModel.getEventUri().getValue() != null && myAdapter.getItemCount() == 0)){
                 annotationViewModel.save();
                 Navigation.findNavController(view).navigate(R.id.action_navigation_annotation_to_navigation_home);
             }else {
